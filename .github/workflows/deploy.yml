@@ -45,7 +45,9 @@ jobs:
 
     - name: Configurar kubectl
       run: |
-        echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > kubeconfig.yaml
+        cat << 'EOF' > kubeconfig.yaml
+        ${{ secrets.Kubeconfig }}
+        EOF
 
     - name: Criar Secret do registry
       run: |
