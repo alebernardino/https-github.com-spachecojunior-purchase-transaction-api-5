@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: container-registry.br-se1.magalu.cloud
+  REGISTRY: container-registry.br-ne1.magalu.cloud
   IMAGE_NAME: cloud-application
 
 jobs:
@@ -34,8 +34,8 @@ jobs:
     - name: Login no Container Registry
       run: |
         docker login https://${{ env.REGISTRY }} \
-          -u ${{ secrets.MGC_REGISTRY_USER }} \
-          -p ${{ secrets.MGC_REGISTRY_PASSWORD }}
+          -u ${{ secrets.REGISTRY_USER }} \
+          -p ${{ secrets.REGISTRY_PASSWORD }}
 
     - name: Build e push da imagem
       run: |
