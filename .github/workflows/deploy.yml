@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: container-registry.br-ne1.magalu.cloud
+  REGISTRY: container-registry.br-se1.magalu.cloud
   IMAGE_NAME: cloud-application
 
 jobs:
@@ -33,9 +33,9 @@ jobs:
 
     - name: Login no Container Registry
       run: |
-        docker login https://${{ env.REGISTRY }} \
+        echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login https://${{ env.REGISTRY }} \
           -u ${{ secrets.REGISTRY_USER }} \
-          -p ${{ secrets.REGISTRY_PASSWORD }}
+          --password-stdin
 
     - name: Build e push da imagem
       run: |
@@ -45,15 +45,15 @@ jobs:
 
     - name: Configurar kubectl
       run: |
-        echo "${{ secrets.MGC_KUBECONFIG }}" > kubeconfig.yaml
+        echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > kubeconfig.yaml
 
     - name: Criar Secret do registry
       run: |
         export KUBECONFIG=kubeconfig.yaml
         kubectl create secret docker-registry registry-secret \
           --docker-server=${{ env.REGISTRY }} \
-          --docker-username=${{ secrets.MGC_REGISTRY_USER }} \
-          --docker-password=${{ secrets.MGC_REGISTRY_PASSWORD }} \
+          --docker-username=${{ secrets.REGISTRY_USER }} \
+          --docker-password=${{ secrets.REGISTRY_PASSWORD }} \
           --dry-run=client -o yaml | kubectl apply -f -
 
     - name: Criar Secret do banco
