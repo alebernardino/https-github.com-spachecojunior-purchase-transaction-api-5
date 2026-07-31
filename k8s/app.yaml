@@ -12,13 +12,13 @@ spec:
   template:
     metadata:
       labels:
-        app: cloud-application    
+        app: cloud-application
     spec:
       imagePullSecrets:
       - name: registry-secret
       containers:
       - name: cloud-application
-        image: container-registry.br-se1.magalu.cloud/${MGC_REGISTRY_NAME}/cloud-application:latest
+        image: container-registry.br-se1.magalu.cloud/${MGC_REGISTRY_NAME}/cloud-application:${IMAGE_TAG}
         ports:
         - containerPort: 8000
         env:
@@ -27,18 +27,22 @@ spec:
             secretKeyRef:
               name: db-secret
               key: url
+        - name: LOG_LEVEL
+          value: "INFO"
         livenessProbe:
           httpGet:
-            path: /health
+            path: /livez
             port: 8000
-          initialDelaySeconds: 10
-          periodSeconds: 10
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: /health
+            path: /readyz
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 5
+          failureThreshold: 2
 
 ---
 
@@ -46,12 +50,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: cloud-application
+  labels:
+    app: cloud-application
 spec:
   selector:
     app: cloud-application
   type: ClusterIP
   ports:
-  - port: 80
+  - name: http
+    port: 80
     targetPort: 8000
     protocol: TCP
 
